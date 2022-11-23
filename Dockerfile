@@ -36,8 +36,10 @@ RUN { \
 
 # 将配置文件、启动脚本复制到容器中
 COPY ./ /var/www/lsky/
-COPY ./000-default.conf /etc/apache2/sites-enabled/
-COPY entrypoint.sh /
+COPY ./config/ /var/www/lsky/
+COPY ./script/ /var/www/lsky/
+COPY ./config/000-default.conf /etc/apache2/sites-enabled/
+COPY ./script/entrypoint.sh /
 
 # 目录为 /var/www/html/
 WORKDIR /var/www/html/
