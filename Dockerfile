@@ -1,12 +1,17 @@
+# 基础镜像系统版本为 php:8.1-apache
 FROM php:8.1-apache
+
+# 维护者信息
+LABEL maintainer="Rabbir admin@cs.cheap"
+
+# 开启Rewrite模块
 RUN a2enmod rewrite
-# 如果构建速度慢可以换源
-# RUN  sed -i -E "s@http://.*.debian.org@http://mirrors.cloud.tencent.com@g" /etc/apt/sources.list
 # 安装相关拓展
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-
 RUN chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions imagick bcmath pdo_mysql pdo_pgsql redis
+
+# 配置
 RUN { \
     echo 'post_max_size = 100M;';\
     echo 'upload_max_filesize = 100M;';\
@@ -29,14 +34,17 @@ RUN { \
     chown -R www-data:root /var/www; \
     chmod -R g=u /var/www
 
+# 将配置文件、启动脚本复制到容器中
 COPY ./ /var/www/lsky/
-# COPY ./apache2.conf /etc/apache2/
 COPY ./000-default.conf /etc/apache2/sites-enabled/
 COPY entrypoint.sh /
-# COPY ./docker-php.conf /etc/apache2/conf-enabled
+
+# 目录为 /var/www/html/
 WORKDIR /var/www/html/
 VOLUME /var/www/html
 EXPOSE 80
+
+# 启动命令
 RUN chmod a+x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apachectl","-D","FOREGROUND"]
